@@ -12,9 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class RequestController {
@@ -25,9 +26,11 @@ public class RequestController {
     private CoursesRepository coursesRepository;
     @Autowired
     private OperatorsRepository operatorsRepository;
+    private static final Logger logger = LoggerFactory.getLogger(RequestController.class);
 
     @GetMapping(value = "/")
     public String index(Model model) {
+        logger.info("Loading main page with all requests");
         model.addAttribute("requests", requestRepository.findAll());
         return "index";
     }
@@ -43,7 +46,14 @@ public class RequestController {
     public String addRequest(@RequestParam String userName,
                              @RequestParam("courseId") Long courseId,
                              @RequestParam String phone) {
+
+        logger.info("Received new request: userName={}, phone={}, courseId={}", userName, phone, courseId);
+
         Courses course = coursesRepository.findById(courseId).orElse(null);
+
+        if (course == null) {
+            logger.warn("Course not found for id={}", courseId);
+        }
 
         ApplicationRequest request = new ApplicationRequest();
         request.setUserName(userName);
@@ -51,11 +61,14 @@ public class RequestController {
         request.setPhone(phone);
         request.setHandled(false);
         requestRepository.save(request);
+
+        logger.info("Request saved successfully with userName={}", userName);
         return "redirect:/";
     }
 
     @GetMapping(value = "/details")
     public String details(@RequestParam Long requestId,  Model model) {
+        logger.info("Fetching details for request id={}", requestId);
         Optional<ApplicationRequest> request = requestRepository.findById(requestId);
         if (request.isPresent()) {
             model.addAttribute("request", request.get());
@@ -63,6 +76,7 @@ public class RequestController {
             model.addAttribute("operators", operatorsRepository.findAll());
             return "details";
         } else {
+            logger.warn("Request not found id={}", requestId);
             return "redirect:/";
         }
     }
@@ -72,8 +86,10 @@ public class RequestController {
                               @RequestParam String userName,
                               @RequestParam("courseId") Long courseId,
                               @RequestParam String phone) {
+        logger.info("Updating request id={}", requestId);
         Optional<ApplicationRequest> request = requestRepository.findById(requestId);
         if (request.isPresent()) {
+            logger.info("Request found, updating...");
             Courses course = coursesRepository.findById(courseId).orElse(null);
 
             ApplicationRequest requestUpdate = request.get();
@@ -81,19 +97,24 @@ public class RequestController {
             requestUpdate.setCourse(course);
             requestUpdate.setPhone(phone);
             requestRepository.save(requestUpdate);
+        } else {
+            logger.warn("Request not found for id={}", requestId);
         }
         return "redirect:/";
     }
 
     @PostMapping(value = "/deleterequest")
     public String deleteRequest(@RequestParam Long requestId) {
+        logger.info("Deleting request id={}", requestId);
         requestRepository.deleteById(requestId);
+        logger.info("Request deleted id={}", requestId);
         return "redirect:/";
     }
 
     @PostMapping(value = "/changehandled")
     public String changeHandled(@RequestParam Long requestId, Model model) {
         Optional<ApplicationRequest> request = requestRepository.findById(requestId);
+        logger.info("Changing handled status for request id={}", requestId);
         if (request.isPresent()) {
             ApplicationRequest requestUpdate = request.get();
 
@@ -111,6 +132,7 @@ public class RequestController {
     @PostMapping(value = "/addoperators")
     public String addOperators(@RequestParam Long requestId,
                                @RequestParam(value = "operatorIds", required = false) List <Long> operatorsIds) {
+        logger.info("Adding operators to request id={}", requestId);
         Optional<ApplicationRequest> request = requestRepository.findById(requestId);
         if (request.isPresent()) {
             ApplicationRequest requestUpdate = request.get();
@@ -125,6 +147,7 @@ public class RequestController {
     @PostMapping(value = "/deleteoperator")
     public String deleteOperators(@RequestParam Long requestId,
                                   @RequestParam Long operatorId) {
+        logger.info("Removing operator {} from request {}", operatorId, requestId);
         Optional<ApplicationRequest> request = requestRepository.findById(requestId);
         if (request.isPresent()) {
             ApplicationRequest requestUpdate = request.get();

@@ -2,6 +2,12 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.5.6"
 	id("io.spring.dependency-management") version "1.1.7"
+	id ("com.github.spotbugs") version "5.0.14"
+}
+
+spotbugs {
+	toolVersion = "4.7.3"
+	ignoreFailures = false
 }
 
 group = "com.example"
@@ -32,7 +38,9 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.postgresql:postgresql")
+	testImplementation ("org.springframework.boot:spring-boot-starter-test")
+	testImplementation ("com.h2database:h2")
 }
 
 tasks.withType<Test> {
