@@ -3,6 +3,8 @@ plugins {
 	id("org.springframework.boot") version "3.5.6"
 	id("io.spring.dependency-management") version "1.1.7"
 	id ("com.github.spotbugs") version "5.0.14"
+	id ("org.owasp.dependencycheck") version "8.4.0"
+
 }
 
 spotbugs {

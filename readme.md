@@ -87,6 +87,12 @@ Identified risks:
 ![img.png](img.png)
 ![img_1.png](img_1.png)
 
+- Vulnerable dependencies
+  (checked by OWASP Dependency-Check)
+
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
+
 **12. How Artifacts Are Used**
 
 Artifact (JAR file):
